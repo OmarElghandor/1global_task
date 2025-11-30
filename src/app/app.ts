@@ -1,0 +1,31 @@
+// src/app/app.ts
+import express from "express";
+import { env } from "../config/env.js";
+import { router } from "./routes/index.js";
+import { errorHandler } from "./middlewares/errorHandler.js";
+
+export function createApp() {
+  const app = express();
+
+  // basic middlewares
+  app.use(express.json());
+
+  // simple request logging
+  app.use((req, _res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+    next();
+  });
+
+  // health check
+  app.get("/ping", (_req, res) => {
+    res.json({ ok: true, env: env.nodeEnv });
+  });
+
+  // main router
+  app.use("/api", router);
+
+  // error handler (should be last)
+  app.use(errorHandler);
+
+  return app;
+}
