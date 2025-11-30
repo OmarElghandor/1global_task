@@ -10,6 +10,17 @@ export function createApp() {
   // basic middlewares
   app.use(express.json());
 
+  // Handle JSON parsing errors
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (err instanceof SyntaxError && 'body' in err) {
+      return res.status(400).json({ 
+        error: "Invalid JSON", 
+        message: err.message 
+      });
+    }
+    next(err);
+  });
+
   // simple request logging
   app.use((req, _res, next) => {
     console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
